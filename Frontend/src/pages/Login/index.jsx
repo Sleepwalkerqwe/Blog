@@ -5,12 +5,16 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import styles from "./Login.module.scss";
-import { fetchAuth } from "../../redux/slices/auth";
+import { fetchAuth, selectIsAuth } from "../../redux/slices/auth";
 
 export const Login = () => {
+  const isAuth = useSelector(selectIsAuth);
+
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -18,12 +22,30 @@ export const Login = () => {
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: "anatik2005@gmail.com",
+      password: "12345",
     },
+    mode: "onChange",
   });
-  const onSubmit = (values) => {
-    dispatch(fetchAuth(values));
+
+  // Редирект, если пользователь уже авторизован
+  React.useEffect(() => {
+    if (isAuth) {
+      navigate("/"); // Редирект на главную страницу
+    }
+  }, [isAuth, navigate]);
+
+  const onSubmit = async (values) => {
+    const data = await dispatch(fetchAuth(values));
+    console.log(12);
+    if (!data.payload) {
+      return alert("Не удалось авторизоваться");
+    }
+    if ("token" in data.payload) {
+      console.log("Юзер успешно авторизовался");
+      window.localStorage.setItem("token", data.payload.token);
+      navigate("/");
+    }
   };
 
   return (
@@ -48,10 +70,16 @@ export const Login = () => {
           fullWidth
           {...register("password", { required: "Укажите пароль" })}
         />
+        <Button
+          disabled={!isValid}
+          type="submit"
+          size="large"
+          variant="contained"
+          fullWidth
+        >
+          Войти
+        </Button>
       </form>
-      <Button type="submit" size="large" variant="contained" fullWidth>
-        Войти
-      </Button>
     </Paper>
   );
 };

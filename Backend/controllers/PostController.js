@@ -96,7 +96,7 @@ export const remove = async (req, res) => {
           success: true,
         });
       }
-    );
+    ).populate("user");
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -122,6 +122,7 @@ export const create = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message: "Не удалось создать статью",
+      err: err.message,
     });
   }
 };
