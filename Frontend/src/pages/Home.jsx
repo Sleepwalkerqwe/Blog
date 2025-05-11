@@ -1,5 +1,4 @@
 import React from "react";
-
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Grid from "@mui/material/Grid";
@@ -8,21 +7,30 @@ import { useDispatch, useSelector } from "react-redux";
 import { Post } from "../components/Post";
 import { TagsBlock } from "../components/TagsBlock";
 import { CommentsBlock } from "../components/CommentsBlock";
-import { fetchPosts, fetchTags } from "../redux/slices/posts";
+import {
+  fetchPosts,
+  fetchTags,
+  fetchComments,
+} from "../redux/slices/postsSlice";
 
 export const Home = () => {
   const dispatch = useDispatch();
   const userData = useSelector((state) => state.auth.data);
 
-  const { posts, tags } = useSelector((state) => state.posts);
-  const isPostsLoading = posts.loading === "loading";
-  const isTagsLoading = tags.loading === "loading";
+  const { posts, tags, comments } = useSelector((state) => state.posts);
+  const isPostsLoading = posts.status === "loading";
+  const isTagsLoading = tags.status === "loading";
+
+  posts.items.map((obj) => {
+    console.log("commnets - ", comments);
+  });
 
   React.useEffect(() => {
     dispatch(fetchPosts());
     dispatch(fetchTags());
-  }, []);
-  console.log(posts);
+    dispatch(fetchComments());
+  }, [dispatch]);
+
   return (
     <>
       <Tabs
@@ -40,6 +48,7 @@ export const Home = () => {
               <Post key={index} isLoading={true} />
             ) : (
               <Post
+                key={obj._id} // Add unique key here
                 _id={obj._id}
                 title={obj.title}
                 imageUrl={
@@ -48,38 +57,20 @@ export const Home = () => {
                 user={{
                   avatarUrl:
                     "https://res.cloudinary.com/practicaldev/image/fetch/s--uigxYVRB--/c_fill,f_auto,fl_progressive,h_50,q_auto,w_50/https://dev-to-uploads.s3.amazonaws.com/uploads/user/profile_image/187971/a5359a24-b652-46be-8898-2c5df32aa6e0.png",
-                  fullName: obj.fullName,
+                  fullName: obj.user?.fullName || "Unknown",
                 }}
                 createdAt={obj.createdAt}
                 viewsCount={obj.viewsCount}
-                commentsCount={3}
+                commentsCount={comments.items[obj._id]?.length || 0}
                 tags={obj.tags}
-                isEditable={userData?._id === obj.user._id}
+                isEditable={userData?._id === obj.user?._id}
               />
             )
           )}
         </Grid>
         <Grid xs={4} item>
-          <TagsBlock items={tags.item} isLoading={isTagsLoading} />
-          <CommentsBlock
-            items={[
-              {
-                user: {
-                  fullName: "Вася Пупкин",
-                  avatarUrl: "https://mui.com/static/images/avatar/1.jpg",
-                },
-                text: "Это тестовый комментарий",
-              },
-              {
-                user: {
-                  fullName: "Иван Иванов",
-                  avatarUrl: "https://mui.com/static/images/avatar/2.jpg",
-                },
-                text: "When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top",
-              },
-            ]}
-            isLoading={false}
-          />
+          <TagsBlock items={tags.items} isLoading={isTagsLoading} />
+          <CommentsBlock />
         </Grid>
       </Grid>
     </>

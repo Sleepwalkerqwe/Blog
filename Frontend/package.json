@@ -23,7 +23,6 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "react-simplemde-editor": "^5.0.2",
-    "sass": "^1.52.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -49,5 +48,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "sass": "^1.87.0",
+    "sass-loader": "^16.0.5",
+    "style-loader": "^4.0.0"
   }
 }

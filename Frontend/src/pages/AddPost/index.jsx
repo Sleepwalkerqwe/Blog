@@ -1,30 +1,21 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import SimpleMDE from "react-simplemde-editor";
-import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 
 import "easymde/dist/easymde.min.css";
-
-import { selectIsAuth } from "../../redux/slices/auth";
-import axios from "../../axios";
 import styles from "./AddPost.module.scss";
+import { selectIsAuth } from "../../redux/slices/authSlice";
+import { useNavigate, Navigate, useParams } from "react-router-dom";
+import axios from "../../axios";
 
 export const AddPost = () => {
-  const { id } = useParams;
-  const isAuth = useSelector(selectIsAuth);
+  const { id } = useParams();
   const navigate = useNavigate();
-
-  // Редирект, если пользователь уже авторизован
-  React.useEffect(() => {
-    if (!window.localStorage.getItem("token") && !isAuth) {
-      navigate("/"); // Редирект на главную страницу
-    }
-  }, [isAuth, navigate]);
-  const [isLoading, setIsLoading] = React.useState(false);
-
+  const isAuth = useSelector(selectIsAuth);
+  const [isLoading, setLoading] = React.useState(false);
   const [text, setText] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [tags, setTags] = React.useState("");
@@ -38,13 +29,11 @@ export const AddPost = () => {
       const formData = new FormData();
       const file = event.target.files[0];
       formData.append("image", file);
-
       const { data } = await axios.post("/upload", formData);
-
       setImageUrl(data.url);
     } catch (err) {
-      console.log(err);
-      alert("Ошибка получения файла");
+      console.warn(err);
+      alert("Ошибка при загрузке файла!");
     }
   };
 
@@ -58,37 +47,45 @@ export const AddPost = () => {
 
   const onSubmit = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
+
       const fields = {
         title,
         imageUrl,
-        tags,
+        tags: tags.split(","),
         text,
       };
+
       const { data } = isEditing
         ? await axios.patch(`/posts/${id}`, fields)
         : await axios.post("/posts", fields);
 
       const _id = isEditing ? id : data._id;
-      navigate(`/posts/${_id}`);
 
-      console.log("пост успешно создан");
+      navigate(`/posts/${_id}`);
     } catch (err) {
       console.warn(err);
-      alert("Ошибка при создании статьи");
+      alert("Ошибка при создании статьи!");
     }
   };
 
   React.useEffect(() => {
     if (id) {
-      axios.get(`/posts/${id}`).then(({ data }) => {
-        setTitle(data.title);
-        setText(data.text);
-        setImageUrl(data.imageUrl);
-        setTags(data.tags.join(""));
-      });
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setText(data.text);
+          setImageUrl(data.imageUrl);
+          setTags(data.tags.join(","));
+        })
+        .catch((err) => {
+          console.warn(err);
+          alert("Ошибка при получении статьи!");
+        });
     }
   }, []);
+
   const options = React.useMemo(
     () => ({
       spellChecker: false,
@@ -103,6 +100,10 @@ export const AddPost = () => {
     }),
     []
   );
+
+  if (!window.localStorage.getItem("token") && !isAuth) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <Paper style={{ padding: 30 }}>
@@ -135,7 +136,6 @@ export const AddPost = () => {
           />
         </>
       )}
-
       <br />
       <br />
       <TextField

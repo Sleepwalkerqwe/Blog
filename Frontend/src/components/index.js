@@ -1,7 +1,11 @@
-export * from "./TagsBlock";
-export * from "./CommentsBlock";
-export * from "./Post";
-export * from "./AddComment";
-export * from "./SideBlock";
-export * from "./UserInfo";
-export * from "./Header";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import store from "./redux/store"; // Default import to match the export
+import App from "./App";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);

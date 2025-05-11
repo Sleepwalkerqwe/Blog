@@ -1,16 +1,14 @@
 import React from "react";
-import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { selectIsAuth } from "../../redux/slices/auth";
-
+import Button from "@mui/material/Button";
 import styles from "./Header.module.scss";
 import Container from "@mui/material/Container";
-import { logout } from "../../redux/slices/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, selectIsAuth } from "../../redux/slices/authSlice"; // Fixed import path
 
 export const Header = () => {
-  const isAuth = useSelector(selectIsAuth);
   const dispatch = useDispatch();
+  const isAuth = useSelector(selectIsAuth);
 
   const onClickLogout = () => {
     if (window.confirm("Вы действительно хотите выйти?")) {
@@ -24,7 +22,7 @@ export const Header = () => {
       <Container maxWidth="lg">
         <div className={styles.inner}>
           <Link className={styles.logo} to="/">
-            <div>SLEEPWALKER BLOG</div>
+            <div>MERN BLOG</div>
           </Link>
           <div className={styles.buttons}>
             {isAuth ? (

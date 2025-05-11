@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import styles from "./Post.module.scss";
 import { UserInfo } from "../UserInfo";
 import { PostSkeleton } from "./Skeleton";
-import { fetchRemovePost } from "../../redux/slices/posts";
+import { fetchRemovePost } from "../../redux/slices/postsSlice";
 
 export const Post = ({
   _id,
